@@ -43,11 +43,15 @@ import org.lwjgl.opengl.GL;
 /* Completed */
 
 public class Texture {
+	//Texture size.
 	private int width;
 	private int height;
+	//Texture color data.
 	private List<ByteBuffer> data;
 	
+	//Texture ID generate by OpenGL.
 	private int 	id;
+	//Texture parameters data.
 	private int 	textureType;
 	private int 	filter;
 	private int 	wrap;
@@ -60,6 +64,7 @@ public class Texture {
 	private int 	dephtMode;
 	private int 	pixelDataType;
 	
+	//Builder for simpler texture setup.
 	public static class Builder {
 		private int 				width;
 		private int 				height;
@@ -78,6 +83,7 @@ public class Texture {
 		private int 	compareMode;
 		private int 	dephtMode;
 		
+		//Set default parameters and data.
 		public Builder() {
 			this.data 					= new ArrayList<ByteBuffer>();
 			this.textureType 			= GL_TEXTURE_2D;
@@ -92,7 +98,7 @@ public class Texture {
 			this.dephtMode 				= GL_NONE;
 			this.pixelDataType 			= GL_UNSIGNED_BYTE;
 		}
-		
+		//setters getters.
 		public Builder setWidth					(int width						) {
 			this.width = width;
 			return this;
@@ -164,11 +170,13 @@ public class Texture {
 			return this;
 		}
 		
+		//Generate texture object and pass data return.
 		public Texture build() {
 			return new Texture(this);
 		}
 	}
 	
+	//Set data witch is get from builder.
 	public Texture(Builder build) {
 		this.width 					= build.width;
 		this.height 				= build.height;
@@ -187,25 +195,32 @@ public class Texture {
 		this.dephtMode				= build.dephtMode;//
 		this.pixelDataType			= build.pixelDataType;//
 		
+		//Set parameters in OpenGl with generated texture.
 		setUp();
 	}
 
 	public void load	() {
+		//Load data to openGL if it's not null.
 		if(data.size() != 0) {
+			//Activate texture object in openGL.
 			bind();
+			//If cube map load data arrays to openlGL texture object with specific parameters.
 			if(this.textureType == GL_TEXTURE_CUBE_MAP) {
 				for(int i = 0; i < data.size(); i++) {
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, this.internalFormat, this.width, this.height, 0, this.pixelDataFromat, this.pixelDataType, data.get(i));
 				}
 			} else {
+				//If image 2D load data to openlGL texture object with specific parameters.
 				glTexImage2D(this.textureType, 0, this.internalFormat, this.width, this.height, 0, this.pixelDataFromat, this.pixelDataType, data.get(0));
 			}
 	
+			//Clear texture color data because it's use memory and later is never been used.
 			for(ByteBuffer data:data) {
 				data.clear();
 			}
 			data.clear();
 			
+			//Set texture parameters.
 			glGenerateMipmap(this.textureType);
 			glTexParameteri(this.textureType, GL_TEXTURE_COMPARE_FUNC	, compareFunc	);
 			glTexParameteri(this.textureType, GL_TEXTURE_COMPARE_MODE	, compareMode	);
@@ -219,47 +234,64 @@ public class Texture {
 			}
 			glTexParameterf(this.textureType, GL_TEXTURE_LOD_BIAS		, mipMapLevel	);
 			glTexParameteri(this.textureType, GL_DEPTH_TEXTURE_MODE	, dephtMode		);
+			//Check is machine support anisotropic filtering.
 			if(GL.getCapabilities().GL_EXT_texture_filter_anisotropic) {
+				//Activate filtering if is supported.
 				float Amount = Math.min(this.antisotropyFilterLevel, glGetFloat(EXTTextureFilterAnisotropic.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT));
 				glTexParameterf(this.textureType, EXTTextureFilterAnisotropic.GL_TEXTURE_MAX_ANISOTROPY_EXT, Amount);
 			} else {
 				System.err.println("texture filter anisotropic not supported!");
 			}
+			//disable texture object.
 			unbind();
 		} else {
+			//Set parameters if no data was represent for frame buffer usage. 
 			setUp();
 		}
 	}
+	//Reload image.
 	public void reload	() {
+		//Activate texture object in openGL.
 		bind();
-		
+		//Load data to openGL if it's not null.
 		if(data.size() != 0) {
+			//If cube map load data arrays to openlGL texture object with specific parameters.
 			if(this.textureType == GL_TEXTURE_CUBE_MAP) {
 				for(int i = 0; i < data.size(); i++) {
 					glTexSubImage2D(this.textureType + i, 0, 0, 0, this.width, this.height, this.pixelDataFromat, this.pixelDataType, data.get(i));
 				}
 			} else {
+				//If image 2D load data to openlGL texture object with specific parameters.
 				glTexSubImage2D(this.textureType, 0, 0, 0, this.width, this.height, this.pixelDataFromat, this.pixelDataType, data.get(0));
 			}
 			
+			//Clear texture color data because it's use memory and later is never been used.
 			for(ByteBuffer data : data) {
 				data.clear();
 			}
 			data.clear();
 		}
-		
+		//Setup does not need because it's should be already setup.
+		//Disable texture object.
 		unbind();
 	}
 	
+	//Load directly from file.
 	public void load	(String File) {
+		//Try to load image.
 		try	{
+			//Load texture data.
 			BufferedImage 	image 		= ImageIO.read(new File(File));
+			//Generate array for color data to store. RGBA so us need to store 4 color values.
 			ByteBuffer 		buffer 		= ByteBuffer.allocateDirect(image.getHeight() * image.getWidth() * 4);
+			//Check it's has alpha blending.
 			boolean 		hasAlpha 	= image.getColorModel().hasAlpha();
 			
+			//Texture height.
 			height 	= image.getHeight();
 			width 	= image.getWidth();
 			
+			//get pixels.
 			int[] pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
 
 			/*Parse data from int array*/
@@ -267,24 +299,30 @@ public class Texture {
 				for(int x = 0; x < image.getWidth(); x++) {
 					int pixel = pixels[y * image.getWidth() + x];
 
+					//Fill buffer with data.
 					buffer.put((byte)((pixel >> 16) & 0xFF));
 					buffer.put((byte)((pixel >> 8) & 0xFF));
 					buffer.put((byte)((pixel) & 0xFF));
+					
+					//If is alpha blending add 0 to buffer.
 					if(hasAlpha)
 						buffer.put((byte)((pixel >> 24) & 0xFF));
 					else
 						buffer.put((byte)(0xFF));
 				}
 			}
-
+			//Flip buffer for reading.
 			buffer.flip();
+			//Add data to data buffer of this object.
 			this.data.add(buffer);
+			//Load data openGL texture object.
 			load();
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.out.println("Failed to load file: " + File);
 		}
 	}
+	//Reload image from file directly.
 	public void reload	(String File) {
 		try	{
 			BufferedImage 	image 		= ImageIO.read(new File(File));
@@ -320,9 +358,12 @@ public class Texture {
 		}
 	}
 	
+	//Set OpenGL texture object parameters.
 	public void setUp	() {
+		//Activate texture object.
 		bind();
 		
+		//Set parameters to object but pass no data. So texture object know it's size but not have color data. it will be loaded leater.
 		glTexImage2D(this.textureType, 0, this.internalFormat, this.width, this.height, 0, this.pixelDataFromat, this.pixelDataType, (ByteBuffer)null);
 		
 		glGenerateMipmap(this.textureType);
@@ -348,13 +389,16 @@ public class Texture {
 		unbind();
 	}
 	
+	/*Activate texture object*/
 	public void bind	() {
 		glBindTexture(textureType, id);
 	}
+	/*Disable texture object*/
 	public void unbind	() {
 		glBindTexture(textureType, 0);
 	}
 	
+	/*Setters getters*/
 	public void setMipMapLevel		(float MipMapLevel	) {
 		this.mipMapLevel = MipMapLevel;
 	}
@@ -414,10 +458,13 @@ public class Texture {
 		return this.data;
 	}
 	
+	//Activate slot for opelGL shader program to know in witch slot to represent loaded data.
+	//Slot determined in GLSL program by sending slot number into variable.
 	public static void activateSlot(int Slot) {
 		glActiveTexture(GL_TEXTURE0 + Slot);
 	}
 	
+	//Clear data.
 	public void cleanUp() {
 		unbind();
 		glDeleteTextures(id);

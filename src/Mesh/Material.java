@@ -9,15 +9,20 @@ import org.joml.Vector4f;
 import Mesh.update15v.Texture;
 
 public class Material {
+	//Texture list for mesh. Color map, normal map, ambient map, ect..
 	private List<Texture> 	Textures;
+	//Names of textures.
 	private List<String> 	Names;
+	//object color.
 	private Vector4f 		Color;
+	//object shines.
 	private Vector2f 		specular;
 	
 	public static class Build{
 		
 	}
 	
+	//Set up variables
 	public Material() {
 		this.Textures 	= new ArrayList<Texture>();
 		this.Names 		= new ArrayList<String>();
@@ -25,17 +30,21 @@ public class Material {
 		this.specular 	= new Vector2f(1.0f, 32.0f				);
 	}
 	
+	//Add texture.
 	public Texture Texture			(Texture Texture, String Name	) {
 		Textures.add(Texture);
 		Names.add(Name);
 		return Texture;
 	}
+	//Get all textures used for rendering.
 	public List<Texture> GetTextures(								) {
 		return Textures;
 	}
+	//get names
 	public List<String> GetNames	(								) {
 		return Names;
 	}
+	//Get texture by name.
 	public Texture Texture			(String Name					) {
 		for(int i = 0; i < Names.size(); i++) {
 			if(Name == Names.get(i)) {
@@ -45,6 +54,7 @@ public class Material {
 		return Textures.get(0);
 	}
 
+	/* setters getters*/
 	public Vector4f Color	(Vector4f Color						) {
 		this.Color = Color;
 		return Color;
@@ -71,6 +81,7 @@ public class Material {
 		return specular;
 	}
 	
+	//Clean up all objects.
 	public void CleanUp() {
 		for(Texture texture : Textures) {
 			if(texture != null) {

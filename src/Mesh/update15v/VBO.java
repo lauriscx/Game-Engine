@@ -4,7 +4,9 @@ import static org.lwjgl.opengl.GL33.*;
 
 /* Completed */
 public class VBO {
+	//vertex buffer object ID.
 	private int id;
+	//buffer parameters.
 	private int bufferType;
 	private int storageType;
 	private int dataType;
@@ -14,7 +16,9 @@ public class VBO {
 	private int size;
 	private boolean normalized;
 	
+	//Builder for easier setup of object.
 	public static class Builder {
+		//buffer parameters.
 		private int bufferType;
 		private int storageType;
 		private int dataType;
@@ -24,6 +28,7 @@ public class VBO {
 		private int size;
 		private boolean normalized;
 		
+		//Default parameters.
 		public Builder() {
 			bufferType 	= GL_ARRAY_BUFFER;
 			storageType = GL_STATIC_DRAW;
@@ -33,7 +38,7 @@ public class VBO {
 			offset 		= 0;
 			normalized 	= false;
 		}
-		
+		/*Setters getters*/
 		public Builder setBufferType	(int bufferType) {
 			this.bufferType = bufferType;
 			return this;
@@ -66,13 +71,16 @@ public class VBO {
 			this.normalized = normalized;
 			return this;
 		}
+		//Generate VBo object and pass data.
 		public VBO build			() {
 			return new VBO(this);
 		}
 	}
 	
 	public VBO(Builder builder) {
+		//Generate opnGl object.
 		this.id 			= glGenBuffers();
+		//Set up data from builder.
 		this.bufferType 	= builder.bufferType;
 		this.storageType 	= builder.storageType;
 		this.dataType 		= builder.dataType;
@@ -83,6 +91,7 @@ public class VBO {
 		this.normalized 	= builder.normalized;
 	}
 	
+	//Activate buffer.
 	public void bind	() {
 		/*Enables vertex buffer object*/
 		glBindBuffer(this.bufferType, this.id);
@@ -92,6 +101,8 @@ public class VBO {
 			enableAttributeArray();
 		}
 	}
+	
+	//Disable buffer.
 	public void unbind	() {
 		/*Disables vertex buffer object*/
 		glBindBuffer(this.bufferType, 0);
@@ -102,9 +113,11 @@ public class VBO {
 		}
 	}
 	
+	//Enable attribute array by index witch is set in shader class.
 	public void enableAttributeArray	() {
 		glEnableVertexAttribArray(this.location);
 	}
+	//Disable attribute array by index witch is set in shader class.
 	public void disableAttributeArray	() {
 		glDisableVertexAttribArray(this.location);
 	}
@@ -143,10 +156,12 @@ public class VBO {
 		glVertexAttribIPointer(this.location, this.size, this.dataType, this.stride, this.offset);
 	}
 	
+	/*Reserve data in buffer for latter to add*/
 	public void ReserveData	(int Size		) {
 		glBufferData(this.bufferType, Size, this.storageType);
 	}
 	
+	/*Store data functions*/
 	public void StoreData	(long 	[] data) {
 		glBufferData(this.bufferType, data, this.storageType);
 	}
@@ -173,7 +188,7 @@ public class VBO {
 		glBufferSubData(this.bufferType, Offset, Data);
 	}
 	
-	
+	//Clean up data
 	public void CleanUp() {
 		unbind();
 		glDeleteBuffers(this.id);

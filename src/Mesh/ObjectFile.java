@@ -5,7 +5,10 @@ import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.Assimp;
 
+/*Using library assimp*/
+
 public class ObjectFile {
+	//Variables to store laoded data.
 	private int[] 	Index;
 	private int[]	MaterialIndex;
 	private float[]	Positions;
@@ -28,20 +31,26 @@ public class ObjectFile {
 	//private int IDCol 		= 0;
 	
 	
+	//Load data.
 	public ObjectFile(String File) {
+		//Load data and select what data how should be processed.
 		AIScene aiScene = Assimp.aiImportFile(File, Assimp.aiProcess_Triangulate | Assimp.aiProcess_GenNormals |
 				Assimp.aiProcess_FlipUVs | Assimp.aiProcess_CalcTangentSpace | Assimp.aiProcess_LimitBoneWeights);
+		//If aiScene null it's mean failed to load data.
 		if (aiScene == null) {
 			System.out.println("Failed load file: " + File);
 			return;
 		}
+		//Fill variables with data.
 		Load(aiScene);
 	}
 	
 	/* Loading data from file this function depends on usable file reader */
 	private void Load(AIScene aiScene) {
+		//Get first mesh in mesh list.
 		AIMesh mesh = AIMesh.create(aiScene.mMeshes().get(0));
 		
+		//Create arrays with size of mesh.
 		ArraysSize 		= mesh.mNumVertices();
 		Index 			= new int[ArraysSize];
 		MaterialIndex	= new int[ArraysSize];
@@ -54,6 +63,7 @@ public class ObjectFile {
 		Weights			= new float[ArraysSize * 12];
 		BonesIndex	 	= new float[ArraysSize * 12];
 		
+		//Fill data to arrays.
 		for(int v = 0; v < mesh.mNumVertices(); v++) {
 			MaterialIndex[IDMID++] = mesh.mMaterialIndex();
 			
@@ -93,7 +103,7 @@ public class ObjectFile {
 	}
 
 	
-	
+	/*Setters getters*/
 	public int[] getIndex() {
 		return Index;
 	}

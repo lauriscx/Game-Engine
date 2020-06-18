@@ -16,29 +16,38 @@ import Mesh.update15v.VBO;
 /* Completed */
 
 public class Mesh {
+	//Vertex array object store all vertex buffer objects (vbo)
 	private VAO 		vao;
+	//Save data in vbo about 3D or 2D object.
 	private List<VBO> 	vbos;
+	//Used to load data from file.
 	private ObjectFile	objectFile;
 	
+	//Init objects.
 	public Mesh() {
 		this.vao 		= new VAO();
 		this.vbos 		= new ArrayList<VBO>();
 	}
 	
+	//Load data from file.
 	public void Load(String file) {
 		this.objectFile = new ObjectFile(file);
 		
+		//Create objects.
 		vao = new VAO();
 		vao.Bind();
 		List<VBO> vbos = new ArrayList<VBO>();
 		
+		//Creates VBO object and fill with data using builder class witch is integrated in vbo class.
 		//Indices
 		vbos.add(new VBO.Builder().setBufferType(GL_ELEMENT_ARRAY_BUFFER)
 				.setStorageType(GL_STATIC_DRAW)
 				.setDataType(GL_UNSIGNED_INT)
 				.build()
 				);
+		//Activate vbo
 		vbos.get(0).bind();
+		//Fill vbo with data.
 		vbos.get(0).StoreData(objectFile.getIndex());
 
 		//Positions
@@ -114,6 +123,7 @@ public class Mesh {
 		vbos.get(6).AttributeSetup();
 		vbos.get(6).StoreData(objectFile.getBiTangents());
 		
+		//Object has animation load additional data.
 		if(objectFile.getWeights().length != 0) {
 			//Joint weights
 			vbos.add(new VBO.Builder().setBufferType(GL_ARRAY_BUFFER)
@@ -139,22 +149,29 @@ public class Mesh {
 			vbos.get(8).AttributeISetup();//AttribIPointer.
 			vbos.get(8).StoreData(objectFile.getBonesIndex());
 		}
+		//Close VAO
 		vao.Unbind();
 	}
-		
+	
+	//Get vao ID.
 	public VAO vao	() {
 		return this.vao;
 	}
+	//Get VBO list.
 	public List<VBO> vbos() {
 		return this.vbos;
 	}
 
+	//Get vertex count of mesh.
 	public int getVertexCount() {
 		return this.objectFile.getPositions().length;
 	}
 	
+	//Clear object data from memory.
 	public void clean() {
+		//Disable VAO if active.
 		this.vao.Bind();
+		//Call function to clear objects they own data.
 		for(VBO vbo : this.vbos) {
 			vbo.CleanUp();
 		}
