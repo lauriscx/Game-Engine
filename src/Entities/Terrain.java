@@ -10,6 +10,8 @@ public class Terrain extends Entity {
 
 	private RigidBody body;
 	
+	
+	//Collision detector.
 	public void setBody(RigidBody body) {
 		this.body = body;
 	}
@@ -18,6 +20,8 @@ public class Terrain extends Entity {
 	public void Update() {
 		// TODO Auto-generated method stub
 		super.Update();
+		
+		//Set entity position from collision detector.
 		
 		javax.vecmath.Vector3f bodyPosition = new javax.vecmath.Vector3f();
 		body.getCenterOfMassPosition(bodyPosition);

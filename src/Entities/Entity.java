@@ -13,27 +13,36 @@ import Components.RawComponent;
 
 
 public abstract class Entity {
+	//Entity all components map. It's store components for updating and access data for manipulation.
 	@SuppressWarnings("rawtypes")
 	protected HashMap<Class, ? extends RawComponent> components = new HashMap<>();
 	
+	//The entity is created is added to entity hash map for updating and tracking.
 	public Entity() {
 		Entities.AddEntity(this, UUID.randomUUID());
 	}
 	
+	//Update entity and all components.
 	@SuppressWarnings("rawtypes")
 	public 	void UpdateSystem	() {
+		//Update entity.
 		Update();
+		//Update components.
 		for (HashMap.Entry<Class, ? extends RawComponent> componentEntities : components.entrySet()) {
 			componentEntities.getValue().Update();
 		}
 	}
 	public 	void Update			() {}
+	
+	//Disable components.
 	@SuppressWarnings("rawtypes")
 	public 	void Disable		() {
 		for (HashMap.Entry<Class, ? extends RawComponent> componentEntities : components.entrySet()) {
 			componentEntities.getValue().Disable();
 		}
 	}
+	
+	//Enable components.
 	@SuppressWarnings("rawtypes")
 	public 	void Enable			() {
 		for (HashMap.Entry<Class, ? extends RawComponent> componentEntities : components.entrySet()) {
@@ -41,19 +50,27 @@ public abstract class Entity {
 		}
 	}
 	
+	//Add component to hash map.
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public 	<T extends RawComponent> void addComponent(T component		) {
+		//synchronize is used if it is used in few treads. If it's not synchronized data can by corrupted.
 		synchronized(components) {
+			//Check if exits this class in this hash map already.
 			if(!components.containsKey(component.getClass())){
-				component.SetParent(this);
+				component.SetParent(this);//Set component parent this entity.
+				//Add to hash map.
 				((HashMap<Class, T>) components).put(component.getClass(), component);
 			}
 		}
 	}
+	
+	//Get component by class.
 	@SuppressWarnings("unchecked")
 	public 	<T> T getComponent		( Class<T> component 				) {
 		return (T) components.get(component);
 	}
+	
+	//Get components list with same class.(not working now because we can't add same class)
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public 	<T> List<T> getComponents( Class<T> component 				) {
 		List<T> componentList = new ArrayList<T>();
@@ -64,6 +81,8 @@ public abstract class Entity {
 		}
 		return componentList;
 	}
+	
+	//Check is hash map contains object.
 	public 	<T> boolean hasComponent( Class<T> component				) {
 		if(components.get(component) == null)
 			return false;
